@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>المزاز</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;800&display=swap');
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }button { -webkit-tap-highlight-color: transparent; touch-action: manipulation; user-select: none; -webkit-user-select: none; }button { cursor: pointer; touch-action: manipulation; }
+  body { font-family: 'Tajawal', sans-serif; background: #0f1117; color: #f0f0f0; min-height: 100vh; }
+  .screen { display: none; min-height: 100vh; padding: 20px; }
+  .screen.active { display: block; }
+
+  /* ── SHARED ── */
+  .logo { text-align: center; padding: 30px 0 20px; }
+  .logo h1 { font-size: 30px; font-weight: 800; color: #f5a623; }
+  .logo p { color: #8a8fa8; font-size: 13px; margin-top: 4px; }
+  .label { font-size: 13px; color: #8a8fa8; margin: 12px 0 6px; }
+  input, select, textarea { width: 100%; padding: 12px 14px; background: #1a1d27; border: 1px solid #2e3248; border-radius: 12px; color: #f0f0f0; font-family: inherit; font-size: 15px; appearance: none; margin-bottom: 4px; }
+  textarea { height: 70px; resize: none; }
+  .btn { width: 100%; padding: 15px; border-radius: 14px; border: none; font-family: inherit; font-size: 17px; font-weight: 800; cursor: pointer; margin-top: 12px; }
+  .btn-orange { background: #f5a623; color: #000; }
+  .btn-green { background: #2ecc71; color: #000; }
+  .btn-red { background: #e8563a; color: #fff; }
+  .btn-blue { background: #3498db; color: #fff; }
+  .btn-gray { background: #1a1d27; color: #f0f0f0; border: 1px solid #2e3248; }
+  .btn:disabled { background: #2e3248 !important; color: #8a8fa8 !important; }
+  .success-box { display: none; text-align: center; padding: 24px; background: #1a1d27; border-radius: 14px; border: 1px solid #2ecc7133; margin-top: 16px; }
+  .success-box .icon { font-size: 44px; margin-bottom: 8px; }
+  .success-box h3 { color: #2ecc71; font-size: 18px; }
+  .success-box p { color: #8a8fa8; font-size: 13px; margin-top: 4px; }
+  .err-box { display: none; color: #e8563a; padding: 12px; background: #e8563a22; border-radius: 10px; margin-top: 10px; font-size: 14px; text-align: center; }
+  .back-btn { background: none; border: none; color: #8a8fa8; font-family: inherit; font-size: 14px; cursor: pointer; padding: 10px 0; display: block; text-align: center; width: 100%; margin-top: 8px; }
+  .card { background: #1a1d27; border-radius: 14px; border: 1px solid #2e3248; overflow: hidden; margin-bottom: 14px; }
+  .card-header { padding: 12px 16px; background: #22263a; font-weight: 700; font-size: 14px; color: #f5a623; }
+  .input-row { display: flex; align-items: center; justify-content: space-between; padding: 11px 14px; border-bottom: 1px solid #2e3248; }
+  .input-row:last-child { border-bottom: none; }
+  .input-row .name { font-size: 14px; font-weight: 600; }
+  .input-row .sub { font-size: 11px; color: #f5a623; margin-top: 1px; }
+  .qty-inp { width: 85px; padding: 8px 10px; background: #22263a; border: 1px solid #2e3248; border-radius: 10px; color: #f0f0f0; font-family: inherit; font-size: 14px; text-align: center; }
+  .search-inp { width: 100%; padding: 11px 14px; background: #1a1d27; border: 1px solid #2e3248; border-radius: 12px; color: #f0f0f0; font-family: inherit; font-size: 14px; margin-bottom: 10px; }
+  .tabs2 { display: flex; gap: 8px; margin-bottom: 14px; }
+  .tab2 { flex: 1; padding: 10px; border-radius: 12px; border: 1px solid #2e3248; background: #1a1d27; color: #8a8fa8; font-family: inherit; font-size: 13px; font-weight: 700; cursor: pointer; }
+  .tab2.active { background: #f5a623; color: #000; border-color: #f5a623; }
+  .total-bar { background: #22263a; padding: 14px 16px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; margin: 12px 0; border: 1px solid #f5a62344; }
+  .total-bar .lbl { color: #8a8fa8; font-size: 14px; }
+  .total-bar .num { font-size: 22px; font-weight: 800; color: #f5a623; }
+  .new-btn { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid #2e3248; background: #1a1d27; color: #f0f0f0; font-family: inherit; font-size: 15px; font-weight: 700; cursor: pointer; margin-top: 8px; display: none; }
+
+  /* PIN */
+  .pin-dots { display: flex; justify-content: center; gap: 12px; margin: 20px 0; }
+  .pin-dot { width: 16px; height: 16px; border-radius: 50%; background: #2e3248; transition: all .2s; }
+  .pin-dot.filled { background: #f5a623; }
+  .pin-pad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; max-width: 280px; margin: 0 auto; }
+  .pin-key { padding: 18px; border-radius: 14px; border: 1px solid #2e3248; background: #1a1d27; color: #f0f0f0; font-family: inherit; font-size: 22px; font-weight: 700; cursor: pointer; }
+  .pin-key:active { background: #f5a623; color: #000; }
+
+  /* Home */
+  .role-btn { width: 100%; padding: 20px 16px; border-radius: 16px; border: none; font-family: inherit; font-size: 18px; font-weight: 800; cursor: pointer; margin-bottom: 12px; display: flex; align-items: center; gap: 14px; -webkit-tap-highlight-color: transparent; user-select: none; }
+  .role-emp { background: #1a1d27; border: 2px solid #2e3248; color: #f0f0f0; }
+  .role-mgr { background: #f5a623; color: #000; }
+  .menu-btn { width: 100%; padding: 16px; border-radius: 14px; border: 1px solid #2e3248; background: #1a1d27; color: #f0f0f0; font-family: inherit; font-size: 15px; font-weight: 700; cursor: pointer; margin-bottom: 10px; display: flex; align-items: center; gap: 12px; text-align: right; }
+  .menu-btn .icon { font-size: 24px; }
+  .menu-btn .sub { font-size: 11px; color: #8a8fa8; font-weight: 400; margin-top: 2px; }
+
+  /* Upload zone */
+  .upload-zone { border: 2px dashed #2e3248; border-radius: 14px; padding: 30px 20px; text-align: center; cursor: pointer; background: #1a1d27; margin-bottom: 14px; }
+  .upload-zone h3 { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+  .upload-zone small { color: #8a8fa8; font-size: 12px; }
+  .preview-box { background: #1a1d27; border-radius: 12px; padding: 12px 14px; margin-bottom: 14px; display: none; justify-content: space-between; align-items: center; border: 1px solid #2e3248; }
+  .preview-box button { background: none; border: none; color: #e8563a; font-size: 18px; cursor: pointer; }
+  .result-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .result-table th { padding: 8px 12px; text-align: right; color: #8a8fa8; background: #22263a; }
+  .result-table td { padding: 9px 12px; border-bottom: 1px solid #2e3248; }
+  .dup-box { display: none; color: #f5a623; padding: 14px; background: #f5a62322; border-radius: 10px; margin-top: 10px; font-size: 14px; text-align: center; border: 1px solid #f5a62344; }
+
+  /* Items list */
+  .items-list { background: #1a1d27; border-radius: 14px; border: 1px solid #2e3248; overflow: hidden; margin-bottom: 14px; max-height: 55vh; overflow-y: auto; }
+  .item-row { display: flex; align-items: center; justify-content: space-between; padding: 11px 14px; border-bottom: 1px solid #2e3248; }
+  .item-row:last-child { border-bottom: none; }
+</style>
+</head>
+<body>
+
+<!-- ══ HOME ══ -->
+<div class="screen active" id="s-home">
+  <div class="logo"><h1>🍽️ المزاز</h1><p>نظام الإدارة الداخلي</p></div>
+  <button class="role-btn role-emp" onclick="go('s-emp-menu')">
+    <span style="font-size:28px">👤</span>
+    <div style="text-align:right">
+      <div>موظف | Employee</div>
+      <div style="font-size:12px;opacity:.6;font-weight:400;margin-top:2px">কর্মচারী</div>
+    </div>
+  </button>
+  <button class="role-btn role-mgr" onclick="go('s-pin')">
+    <span style="font-size:28px">🔐</span>
+    <div style="text-align:right">
+      <div>المدير | Manager</div>
+    </div>
+  </button>
+</div>
+
+<!-- ══ PIN ══ -->
+<div class="screen" id="s-pin">
+  <div class="logo"><h1>🔐</h1><p>أدخل الرمز السري</p></div>
+  <div class="pin-dots">
+    <div class="pin-dot" id="d0"></div><div class="pin-dot" id="d1"></div>
+    <div class="pin-dot" id="d2"></div><div class="pin-dot" id="d3"></div>
+  </div>
+  <div class="pin-pad">
+    <button class="pin-key" onclick="pk('1')">1</button>
+    <button class="pin-key" onclick="pk('2')">2</button>
+    <button class="pin-key" onclick="pk('3')">3</button>
+    <button class="pin-key" onclick="pk('4')">4</button>
+    <button class="pin-key" onclick="pk('5')">5</button>
+    <button class="pin-key" onclick="pk('6')">6</button>
+    <button class="pin-key" onclick="pk('7')">7</button>
+    <button class="pin-key" onclick="pk('8')">8</button>
+    <button class="pin-key" onclick="pk('9')">9</button>
+    <button class="pin-key" onclick="pk('')"></button>
+    <button class="pin-key" onclick="pk('0')">0</button>
+    <button class="pin-key" onclick="pdel()">⌫</button>
+  </div>
+  <div class="err-box" id="pin-err" style="display:none">❌ رمز خاطئ</div>
+  <button class="back-btn" onclick="go('s-home')">← رجوع</button>
+</div>
+
+<!-- ══ EMPLOYEE MENU ══ -->
+<div class="screen" id="s-emp-menu">
+  <div class="logo"><h1>🍽️ المزاز</h1></div>
+  <button class="menu-btn" onclick="go('s-invoice')"><span class="icon">🧾</span><div><div>رفع فاتورة</div><div class="sub">Upload Invoice • চালন আপলোড</div></div></button>
+  <button class="menu-btn" onclick="loadInventory();go('s-inventory')"><span class="icon">📦</span><div><div>المخزون</div><div class="sub">Inventory • ইনভেন্টরি</div></div></button>
+  <button class="menu-btn" onclick="go('s-sales')"><span class="icon">📊</span><div><div>المبيعات اليومية</div><div class="sub">Daily Sales • দনিক বিক্রয়</div></div></button>
+  <button class="menu-btn" onclick="go('s-waste')"><span class="icon">🗑️</span><div><div>تسجيل هدر</div><div class="sub">Waste Log • অপচয়</div></div></button>
+  <button class="back-btn" onclick="go('s-home')">← رجوع</button>
+</div>
+
+<!-- ══ MANAGER MENU ══ -->
+<div class="screen" id="s-mgr-menu">
+  <div class="logo"><h1>🍽️ المزاز</h1><p style="color:#f5a623">لوحة المدير</p></div>
+  <button class="menu-btn" onclick="go('s-invoice')"><span class="icon">🧾</span><div>رفع فاتورة</div></button>
+  <button class="menu-btn" onclick="loadInventory();go('s-inventory')"><span class="icon">📦</span><div>المخزون</div></button>
+  <button class="menu-btn" onclick="go('s-sales')"><span class="icon">📊</span><div>المبيعات اليومية</div></button>
+  <button class="menu-btn" onclick="go('s-admin')"><span class="icon">⚙️</span><div>الإدارة — ذمم، مصاريف، عهدة</div></button>
+  <button class="menu-btn" onclick="go('s-waste')"><span class="icon">🗑️</span><div>تسجيل هدر</div></button>
+  <button class="back-btn" onclick="go('s-home')">← تسجيل خروج</button>
+</div>
+
+<!-- ══ INVOICE ══ -->
+<div class="screen" id="s-invoice">
+  <div class="logo"><h1>🧾 رفع فاتورة</h1><p>Upload Invoice • চালান আপলোড করন</p></div>
+  <div class="upload-zone" onclick="document.getElementById('file-inp').click()">
+    <input type="file" id="file-inp" accept="image/*,application/pdf" onchange="handleFile(this)" style="display:none">
+    <div style="font-size:36px;margin-bottom:8px">📎</div>
+    <h3>صورة أو PDF</h3>
+    <small>Image or PDF • ছবি বা PDF</small>
+  </div>
+  <div class="preview-box" id="prev-box">
+    <span id="prev-name"></span>
+    <button onclick="clearFile()">✕</button>
+  </div>
+  <div class="label">المورد / Supplier</div>
+  <input type="text" id="inv-supplier" placeholder="اسم المورد">
+  <div class="label">التصنيف / Category</div>
+  <select id="inv-cat">
+    <option>مشتريات المطبخ</option>
+    <option>مشتريات فرع صبيا</option>
+    <option>مصاريف حكومية</option>
+    <option>صيانة وتشغيل</option>
+    <option>أصول</option>
+    <option>رواتب</option>
+    <option>سلف</option>
+    <option>مصاريف بدون فاتورة</option>
+    <option>نثريات</option>
+  </select>
+  <button class="btn btn-orange" id="inv-btn" onclick="submitInvoice()" disabled>📤 إرسال | Send</button>
+  <div class="err-box" id="inv-err"></div>
+  <div class="dup-box" id="inv-dup"></div>
+  <div class="success-box" id="inv-suc">
+    <div class="icon">✅</div><h3>تم الحفظ!</h3><p>Saved! • সংরক্ষিত!</p>
+    <div id="inv-result-wrap" style="margin-top:12px;overflow-x:auto"></div>
+  </div>
+  <button class="new-btn" id="inv-new" onclick="resetInvoice()">➕ فاتورة جديدة</button>
+  <button class="back-btn" id="inv-back" onclick="goBack()">← رجوع</button>
+</div>
+
+<!-- ══ INVENTORY ══ -->
+<div class="screen" id="s-inventory">
+  <div class="logo"><h1>📦 المخزون</h1><p>Inventory • ইনভেন্টরি</p></div>
+  <div class="tabs2">
+    <button class="tab2 active" id="tab-add" onclick="switchInv('add')">➕ إضافة | Add</button>
+    <button class="tab2" id="tab-with" onclick="switchInv('withdraw')">➖ سحب | Withdraw</button>
+  </div>
+  <div class="label">اسمك / Your name</div>
+  <select id="inv-emp">
+    <option>محمود</option><option>ابراهيم</option>
+    <option>عاشق | Ashiq</option><option>عبدالرحيم | Abdurrahim</option><option>نادر</option>
+  </select>
+  <div id="inv-notes-wrap">
+    <div class="label">ملاحظات (اختياري)</div>
+    <input type="text" id="inv-notes" placeholder="مثال: فاتورة 123">
+  </div>
+  <input class="search-inp" id="inv-search" placeholder="🔍 ابحث / Search" oninput="filterInv()">
+  <div class="items-list" id="inv-list"><div style="padding:30px;text-align:center;color:#8a8fa8">⏳ جاري التحميل...</div></div>
+  <button class="btn btn-green" id="inv-add-btn" onclick="submitInvAdd()">✅ تأكيد الإضافة | Confirm Add</button>
+  <button class="btn btn-red" id="inv-with-btn" style="display:none" onclick="submitInvWith()">📤 تأكيد السحب | Confirm Withdraw</button>
+  <div class="err-box" id="inv-err2"></div>
+  <div class="success-box" id="inv-suc2">
+    <div class="icon">✅</div><h3 id="inv-suc2-title">تم!</h3><p>Updated! • আপডেট হয়েছে!</p>
+  </div>
+  <button class="new-btn" id="inv-new2" onclick="resetInv()">➕ عملية جديدة</button>
+  <button class="back-btn" onclick="goBack()">← رجوع</button>
+</div>
+
+<!-- ══ SALES ══ -->
+<div class="screen" id="s-sales">
+  <div class="logo"><h1>📊 المبيعات اليومية</h1><p>Daily Sales • দৈনিক বিকয়</p></div>
+  <div class="tabs2">
+    <button class="tab2 active" id="stab-sales" onclick="switchSales('sales')">📊 مبيعات</button>
+    <button class="tab2" id="stab-cash" onclick="switchSales('cash')">💰 تسليم كاش</button>
+  </div>
+  <div id="sales-form">
+    <div class="label">الفرع</div>
+    <select id="s-branch"><option>جيزان</option><option>صبيا</option></select>
+    <div class="label">التاريخ</div>
+    <input type="date" id="s-date" style="margin-bottom:14px">
+    <div class="card">
+      <div class="card-header">💵 وسائل الدفع</div>
+      <div class="input-row"><div><div class="name">كاش</div><div class="sub">Cash</div></div><input type="number" class="qty-inp" id="sc-cash" placeholder="0" oninput="calcSalesTotal()"></div>
+      <div class="input-row"><div><div class="name">شبكة / مدى</div><div class="sub">Mada</div></div><input type="number" class="qty-inp" id="sc-mada" placeholder="0" oninput="calcSalesTotal()"></div>
+      <div class="input-row"><div><div class="name">فيزا</div><div class="sub">Visa</div></div><input type="number" class="qty-inp" id="sc-visa" placeholder="0" oninput="calcSalesTotal()"></div>
+      <div class="input-row"><div><div class="name">ماستر كارد</div><div class="sub">Mastercard</div></div><input type="number" class="qty-inp" id="sc-master" placeholder="0" oninput="calcSalesTotal()"></div>
+      <div class="input-row"><div><div class="name">أمريكان إكسبريس</div><div class="sub">Amex</div></div><input type="number" class="qty-inp" id="sc-amex" placeholder="0" oninput="calcSalesTotal()"></div>
+      <div class="input-row"><div><div class="name">اشتراكات</div><div class="sub">Subscriptions</div></div><input type="number" class="qty-inp" id="sc-subs" placeholder="0" oninput="calcSalesTotal()"></div>
+    </div>
+    <div class="card">
+      <div class="card-header">🛵 برامج التوصيل</div>
+      <div class="input-row"><div class="name">جاهز</div><input type="number" class="qty-inp" id="sc-jahiz" placeholder="0" oninput="calcSalesTotal()"></div>
+      <div class="input-row"><div class="name">هنقرستيشن</div><input type="number" class="qty-inp" id="sc-hunger" placeholder="0" oninput="calcSalesTotal()"></div>
+      <div class="input-row"><div class="name">كيتا</div><input type="number" class="qty-inp" id="sc-keeta" placeholder="0" oninput="calcSalesTotal()"></div>
+    </div>
+    <div class="total-bar"><div class="lbl">إجمالي اليوم</div><div class="num" id="sales-total">0 ريال</div></div>
+    <button class="btn btn-green" id="sales-btn" onclick="submitSales()">✅ تأكيد المبيعات</button>
+    <div class="err-box" id="sales-err"></div>
+    <div class="success-box" id="sales-suc"><div class="icon">✅</div><h3>تم الحفظ!</h3></div>
+    <button class="new-btn" id="sales-new" onclick="resetSales()">➕ إدخال جديد</button>
+  </div>
+  <div id="cash-form" style="display:none">
+    <div class="label">الفرع</div>
+    <select id="cf-branch"><option>جيزان</option><option>صبيا</option></select>
+    <div class="label">المبلغ (ريال)</div>
+    <input type="number" id="cf-amount" placeholder="0" style="font-size:20px;text-align:center">
+    <div class="label">ملاحظات (اختياري)</div>
+    <input type="text" id="cf-notes" placeholder="">
+    <button class="btn btn-orange" id="cash-btn" onclick="submitCashH()">💰 تأكيد التسليم</button>
+    <div class="err-box" id="cash-err"></div>
+    <div class="success-box" id="cash-suc"><div class="icon">✅</div><h3>تم التسجيل!</h3></div>
+    <button class="new-btn" id="cash-new" onclick="resetCashH()">➕ تسليم جديد</button>
+  </div>
+  <button class="back-btn" onclick="goBack()">← رجوع</button>
+</div>
+
+<!-- ══ WASTE ══ -->
+<div class="screen" id="s-waste">
+  <div class="logo"><h1>🗑️ تسجيل هدر</h1><p>Waste Log • অপচয়</p></div>
+  <div class="label">الفرع</div>
+  <select id="w-branch"><option>جيزان</option><option>صبيا</option></select>
+  <div class="label">الصنف / Item</div>
+  <input type="text" id="w-item" placeholder="مثال: خس">
+  <div class="label">الكمية والوحدة</div>
+  <div style="display:flex;gap:8px">
+    <input type="number" id="w-qty" placeholder="الكمية" style="flex:1">
+    <select id="w-unit" style="flex:1"><option>كيلو</option><option>جرام</option><option>حبة</option><option>علبة</option><option>لتر</option><option>ملي</option></select>
+  </div>
+  <div class="label">السبب</div>
+  <select id="w-reason"><option>تالف</option><option>منتهي الصلاحية</option><option>سقط وانكسر</option><option>طبخ خاطئ</option><option>أخرى</option></select>
+  <div class="label">ملاحظات (اختياري)</div>
+  <input type="text" id="w-notes" placeholder="">
+  <button class="btn btn-orange" id="w-btn" onclick="submitWaste()">🗑️ تسجيل الهدر</button>
+  <div class="err-box" id="w-err"></div>
+  <div class="success-box" id="w-suc"><div class="icon">✅</div><h3>تم التسجيل!</h3></div>
+  <button class="new-btn" id="w-new" onclick="resetWaste()">➕ تسجيل جديد</button>
+  <button class="back-btn" onclick="goBack()">← رجوع</button>
+</div>
+
+<!-- ══ ADMIN ══ -->
+<div class="screen" id="s-admin">
+  <div class="logo"><h1>⚙️ الإدارة</h1></div>
+  <div class="tabs2" style="flex-wrap:wrap">
+    <button class="tab2 active" onclick="switchAdmin('debt')" id="at-debt">💳 ذمم</button>
+    <button class="tab2" onclick="switchAdmin('cashbox')" id="at-cb">💵 عهدة</button>
+    <button class="tab2" onclick="switchAdmin('expenses')" id="at-exp">📋 مصاريف</button>
+  </div>
+
+  <!-- ذمم -->
+  <div id="ad-debt">
+    <div class="tabs2">
+      <button class="tab2 active" onclick="switchDebt('add')" id="dt-add">➕ إضافة د
